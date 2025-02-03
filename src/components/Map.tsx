@@ -7,6 +7,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import LoadingSpinner from './LoadingSpinner';
 import Sidebar from './Sidebar';
 import CloseIcon from '@mui/icons-material/Close';
+import PaymentDialog from './PaymentDialog';
 
 const mapContainerStyle = {
   width: '100%',
@@ -81,6 +82,7 @@ export default function Map() {
   const [showStreetView, setShowStreetView] = useState(false);
   const [clickedLocation, setClickedLocation] = useState<google.maps.LatLng | null>(null);
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   useEffect(() => {
     // Initialize with Nairobi's spaces when component mounts
@@ -127,8 +129,14 @@ export default function Map() {
   }, [visibleSpaces]);
 
   const handleBooking = (space: ParkingSpace) => {
-    // TODO: Implement booking and payment logic
-    console.log('Booking space:', space);
+    setSelectedSpace(space);
+    setShowPaymentDialog(true);
+  };
+
+  const handlePaymentComplete = () => {
+    // Update the space status or perform any other necessary actions
+    console.log('Payment completed successfully');
+    setSelectedSpace(null);
   };
 
   const handleCityChange = (city: string | null) => {
@@ -153,6 +161,57 @@ export default function Map() {
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMapRef(map);
   }, []);
+
+  const handleStreetViewClick = useCallback((event: { latLng?: google.maps.LatLng; preventDefault: () => void }) => {
+    // Prevent default right-click menu
+    event.preventDefault();
+    if (!event.latLng) return;
+    
+    const clickedLat = event.latLng.lat();
+    const clickedLng = event.latLng.lng();
+
+    // Create a new parking space at the clicked location
+    const newSpace: ParkingSpace = {
+      id: `new-${Date.now()}`,
+      location: { lat: clickedLat, lng: clickedLng },
+      status: 'available',
+      pricePerHour: 100,
+      spaceNumber: 'New',
+    };
+    setSelectedSpace(newSpace);
+    setClickedLocation(event.latLng);
+  }, []);
+
+  useEffect(() => {
+    if (mapRef && showStreetView && clickedLocation) {
+      const panorama = new google.maps.StreetViewPanorama(mapRef.getDiv(), {
+        position: clickedLocation,
+        pov: { heading: 0, pitch: 0 },
+        zoom: 1,
+        visible: true,
+        addressControl: false,
+      });
+
+      // Add both left and right click listeners
+      panorama.addListener('click', handleStreetViewClick);
+      panorama.addListener('rightclick', handleStreetViewClick);
+
+      // Prevent context menu in street view
+      const element = mapRef.getDiv();
+      element.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      mapRef.setStreetView(panorama);
+
+      return () => {
+        google.maps.event.clearListeners(panorama, 'click');
+        google.maps.event.clearListeners(panorama, 'rightclick');
+        element.removeEventListener('contextmenu', (e) => e.preventDefault());
+        if (mapRef) {
+          mapRef.setStreetView(null);
+        }
+      };
+    }
+  }, [mapRef, showStreetView, clickedLocation, handleStreetViewClick]);
 
   if (loadError) return (
     <Box
@@ -180,18 +239,82 @@ export default function Map() {
       />
       <Box flexGrow={1} position="relative" height="100%" width="100%">
         {showStreetView && (
-          <Fab
-            color="primary"
-            sx={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}
-            onClick={() => {
-              if (mapRef) {
-                mapRef.setStreetView(null);
-                setShowStreetView(false);
-              }
-            }}
-          >
-            <ExitToAppIcon />
-          </Fab>
+          <>
+            <Fab
+              color="primary"
+              sx={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}
+              onClick={() => {
+                if (mapRef) {
+                  mapRef.setStreetView(null);
+                  setShowStreetView(false);
+                }
+              }}
+            >
+              <ExitToAppIcon />
+            </Fab>
+            <Typography
+              sx={{
+                position: 'absolute',
+                top: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 2,
+                bgcolor: 'background.paper',
+                p: 1,
+                borderRadius: 1,
+                boxShadow: 1,
+              }}
+            >
+              Right click anywhere on the street to mark a parking spot
+            </Typography>
+            {selectedSpace && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  right: 16,
+                  top: 80,
+                  zIndex: 2,
+                  bgcolor: 'background.paper',
+                  p: 2,
+                  borderRadius: 1,
+                  boxShadow: 3,
+                  width: 280,
+                }}
+              >
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Typography variant="h6">
+                    {selectedSpace.id.startsWith('new-') ? 'New Parking Space' : `Space ${selectedSpace.spaceNumber}`}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => setSelectedSpace(null)}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Typography variant="body1" gutterBottom>
+                  Location: {currentStreet || 'Street not selected'}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  Status: {selectedSpace.status}
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                  Price: KES {selectedSpace.pricePerHour}/hour
+                </Typography>
+                {selectedSpace.status === 'available' && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 2 }}
+                    onClick={() => handleBooking(selectedSpace)}
+                  >
+                    Book This Spot
+                  </Button>
+                )}
+              </Box>
+            )}
+          </>
         )}
         <GoogleMap
           id="map"
@@ -283,6 +406,14 @@ export default function Map() {
           )}
         </GoogleMap>
       </Box>
+      {selectedSpace && showPaymentDialog && (
+        <PaymentDialog
+          open={showPaymentDialog}
+          onClose={() => setShowPaymentDialog(false)}
+          parkingSpace={selectedSpace}
+          onPaymentComplete={handlePaymentComplete}
+        />
+      )}
     </Box>
   );
 } 

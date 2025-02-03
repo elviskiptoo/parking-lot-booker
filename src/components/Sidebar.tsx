@@ -1,53 +1,6 @@
-import { useState } from 'react';
-import {
-  Drawer,
-  List,
-  ListItem,
-  TextField,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  useTheme,
-  useMediaQuery,
-  Autocomplete,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
+import { Box, Typography, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { ParkingSpace } from '../types';
-
-// Mock data for cities and streets (you would fetch this from an API)
-const KENYA_CITIES = [
-  'Nairobi',
-  'Mombasa',
-  'Kisumu',
-  'Nakuru',
-  'Eldoret',
-  'Thika',
-  'Malindi',
-  'Kitale',
-  'Garissa',
-  'Kakamega',
-];
-
-const MOCK_STREETS: { [key: string]: string[] } = {
-  'Nairobi': [
-    'Kenyatta Avenue',
-    'Moi Avenue',
-    'Tom Mboya Street',
-    'Kimathi Street',
-    'Mama Ngina Street',
-    'Harambee Avenue',
-    'City Hall Way',
-    'Muindi Mbingu Street',
-  ],
-  'Mombasa': [
-    'Moi Avenue',
-    'Digo Road',
-    'Nyerere Avenue',
-    'Nkrumah Road',
-  ],
-};
+import { Waves } from './ui/waves-background';
 
 interface SidebarProps {
   selectedSpace: ParkingSpace | null;
@@ -62,117 +15,120 @@ export default function Sidebar({
   onStreetChange,
   onBookingRequest,
 }: SidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [selectedStreet, setSelectedStreet] = useState<string | null>(null);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const handleCityChange = (city: string | null) => {
-    setSelectedCity(city);
-    setSelectedStreet(null);
-    onCityChange(city);
-  };
-
-  const handleStreetChange = (street: string | null) => {
-    setSelectedStreet(street);
-    onStreetChange(street);
-  };
-
-  const drawerContent = (
-    <Box sx={{ width: isMobile ? '100vw' : 300, p: 2 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">Find Parking</Typography>
-        {isMobile && (
-          <IconButton onClick={() => setIsOpen(false)}>
-            <CloseIcon />
-          </IconButton>
-        )}
-      </Box>
-
-      <List>
-        <ListItem>
-          <Autocomplete
-            fullWidth
-            options={KENYA_CITIES}
-            value={selectedCity}
-            onChange={(_, newValue) => handleCityChange(newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Select City" variant="outlined" />
-            )}
-          />
-        </ListItem>
-
-        <ListItem>
-          <Autocomplete
-            fullWidth
-            options={selectedCity ? MOCK_STREETS[selectedCity] || [] : []}
-            value={selectedStreet}
-            onChange={(_, newValue) => handleStreetChange(newValue)}
-            disabled={!selectedCity}
-            renderInput={(params) => (
-              <TextField {...params} label="Select Street" variant="outlined" />
-            )}
-          />
-        </ListItem>
-
-        {selectedSpace && (
-          <ListItem>
-            <Box width="100%">
-              <Typography variant="subtitle1" gutterBottom>
-                Selected Spot: {selectedSpace.spaceNumber}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Status: {selectedSpace.status}
-              </Typography>
-              <Typography variant="body2" gutterBottom>
-                Price: KES {selectedSpace.pricePerHour}/hour
-              </Typography>
-              {selectedSpace.status === 'available' && (
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  onClick={() => onBookingRequest(selectedSpace)}
-                  sx={{ mt: 2 }}
-                >
-                  Pay Now
-                </Button>
-              )}
-            </Box>
-          </ListItem>
-        )}
-      </List>
-    </Box>
-  );
-
   return (
-    <>
-      {isMobile && !isOpen && (
-        <IconButton
-          sx={{ position: 'absolute', top: 10, left: 10, zIndex: 1000, bgcolor: 'background.paper' }}
-          onClick={() => setIsOpen(true)}
-        >
-          <MenuIcon />
-        </IconButton>
-      )}
-      
-      <Drawer
-        variant={isMobile ? 'temporary' : 'permanent'}
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
+    <Box
+      sx={{
+        width: 300,
+        height: '100vh',
+        position: 'relative',
+        bgcolor: 'background.paper',
+        borderRight: 1,
+        borderColor: 'divider',
+        overflow: 'hidden',
+      }}
+    >
+      <Waves
+        lineColor="rgba(25, 118, 210, 0.08)"
+        backgroundColor="rgba(255, 255, 255, 0.95)"
+        waveSpeedX={0.3}
+        waveSpeedY={0.2}
+        waveAmpX={90}
+        waveAmpY={40}
+        friction={0.99}
+        tension={0.02}
+        maxCursorMove={150}
+        xGap={24}
+        yGap={24}
+      />
+      <Box
         sx={{
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: isMobile ? '100%' : 300,
-            height: '100%',
-            zIndex: theme.zIndex.drawer,
-          },
+          position: 'relative',
+          zIndex: 1,
+          height: '100%',
+          p: 3,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+          overflow: 'auto',
+          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
         }}
       >
-        {drawerContent}
-      </Drawer>
-    </>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Parking Lot Booker
+        </Typography>
+
+        <FormControl fullWidth>
+          <InputLabel>Select City</InputLabel>
+          <Select
+            label="Select City"
+            onChange={(e) => onCityChange(e.target.value as string)}
+            defaultValue=""
+            sx={{ bgcolor: 'background.paper' }}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value="Nairobi">Nairobi</MenuItem>
+            <MenuItem value="Mombasa">Mombasa</MenuItem>
+            <MenuItem value="Kisumu">Kisumu</MenuItem>
+            <MenuItem value="Nakuru">Nakuru</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Select Street</InputLabel>
+          <Select
+            label="Select Street"
+            onChange={(e) => onStreetChange(e.target.value as string)}
+            defaultValue=""
+            sx={{ bgcolor: 'background.paper' }}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value="Street 1">Street 1</MenuItem>
+            <MenuItem value="Street 2">Street 2</MenuItem>
+            <MenuItem value="Street 3">Street 3</MenuItem>
+          </Select>
+        </FormControl>
+
+        {selectedSpace && (
+          <Box
+            sx={{
+              mt: 2,
+              p: 2,
+              bgcolor: 'background.paper',
+              borderRadius: 1,
+              boxShadow: 1,
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Selected Space Details
+            </Typography>
+            <Typography>
+              Space Number: {selectedSpace.spaceNumber}
+            </Typography>
+            <Typography>
+              Status: {selectedSpace.status}
+            </Typography>
+            <Typography gutterBottom>
+              Price: KES {selectedSpace.pricePerHour}/hour
+            </Typography>
+            {selectedSpace.status === 'available' && (
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => onBookingRequest(selectedSpace)}
+                sx={{ mt: 2 }}
+              >
+                Book Now
+              </Button>
+            )}
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 } 
