@@ -1,182 +1,88 @@
-# parking-lot-booker
+# Parking Lot Booker 🚗
 
-Core Features Analysis:
+A modern web application for finding and booking parking spaces in major Kenyan cities. The application provides real-time parking space availability, street view integration, and M-Pesa payment processing.
 
-Map Integration
+![Parking Lot Booker Screenshot](docs/spot.png)
 
+## Features ✨
 
-Google Maps API integration for displaying parking locations in Kenyan cities
-Interactive map with zoom functionality and street view capability
-Custom markers for parking spaces with different status indicators:
+- 🗺️ Interactive Google Maps integration with street view
+- 🅿️ Real-time parking space availability
+- 📍 Multiple cities and streets support
 
-Green: Available spaces
-Red: Booked spaces
-Orange: Soon-to-expire bookings
+- 💳 M-Pesa payment integration
+- ⏱️ Flexible parking duration options
+- 👀 Street view booking capability
+- 🎨 Modern UI with animated waves background
 
+## Cities Covered 🏙️
 
+- Nairobi
+- Mombasa
+- Kisumu
+- Nakuru
 
+## Setup Instructions 🚀
 
-Booking System
+### Prerequisites
 
+- Node.js (v14 or higher)
+- npm or yarn
+- Google Maps API key
+- M-Pesa API credentials
 
-Real-time parking space availability tracking
-Time-based booking functionality
-Booking extension capability
-Status tracking and time monitoring
+### Environment Setup
 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/parking-lot-booker.git
+   cd parking-lot-booker
+   ```
 
-Payment Integration
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
+3. Create a `.env` file in the root directory with the following variables:
+   ```env
+   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   VITE_MPESA_CONSUMER_KEY=your_mpesa_consumer_key
+   VITE_MPESA_CONSUMER_SECRET=your_mpesa_consumer_secret
+   VITE_MPESA_BASIC_AUTH=your_mpesa_basic_auth
+   ```
 
-M-Pesa integration for mobile payments
-Payment processing for initial bookings
-Payment handling for time extensions
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-Technical Stack Breakdown:
+## Usage 📱
 
-Frontend
+1. Select a city from the dropdown menu
+2. Choose a street to view available parking spaces
+3. Click on a parking space marker or use street view to find a spot
+4. Select parking duration (1-24 hours)
+5. Enter M-Pesa phone number and complete payment
+6. Receive confirmation of your booking
 
+## Technologies Used 🛠️
 
-TypeScript for type safety
-React for UI components
-Vite for build tooling and development environment
-Google Maps JavaScript API
-React components for:
+- React + TypeScript
+- Vite
+- Material-UI
+- Google Maps API
+- M-Pesa API
+- Tailwind CSS
 
-Map display
-Booking forms
-Payment interface
-Status indicators
-Time management
+## Contributing 🤝
 
+Contributions are welcome! Please feel free to submit a Pull Request.
 
+## License 📄
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Backend Requirements (not specified but necessary)
+## Support 💬
 
-
-API for parking space management
-Real-time database for space availability
-Authentication system
-Payment processing backend
-Booking management system
-
-
-Database schema
-[
-interface ParkingSpace {
-  id: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  status: 'available' | 'booked' | 'expiring';
-  currentBooking?: {
-    userId: string;
-    startTime: Date;
-    endTime: Date;
-    paymentStatus: 'pending' | 'completed';
-  };
-  pricePerHour: number;
-  spaceNumber: string;
-}
-
-interface Booking {
-  id: string;
-  spaceId: string;
-  userId: string;
-  startTime: Date;
-  endTime: Date;
-  paymentDetails: {
-    mpesaTransactionId: string;
-    amount: number;
-    status: string;
-  };
-}
-
-]
-
-Key Technical Considerations:
-
-Real-time Updates
-
-
-WebSocket integration for live space availability updates
-Real-time booking status changes
-Immediate payment confirmation
-
-
-Performance Optimization
-
-
-Map marker clustering for large parking areas
-Lazy loading of street view data
-Efficient state management for real-time updates
-
-
-User Experience
-
-
-Intuitive map navigation
-Clear visual indicators for space status
-Simple booking process
-Quick payment flow
-Easy time extension process
-
-
-M-Pesa Integration Requirements
-
-
-M-Pesa API integration
-STK Push for payment initiation
-Payment confirmation handling
-Transaction history tracking
-
-
-Location-specific Features
-
-
-Geolocation support for finding nearby parking
-Custom map styling for better visibility
-Local language support (Swahili/English)
-
-Development Phases (Recommended):
-
-Phase 1: Core Map Implementation
-
-
-Basic map integration
-Parking space markers
-Space status visualization
-
-
-Phase 2: Booking System
-
-
-Booking interface
-Time management
-Status tracking
-
-
-Phase 3: Payment Integration
-
-
-M-Pesa integration
-Payment processing
-Booking confirmation
-
-
-Phase 4: Real-time Features
-
-
-Live updates
-Status changes
-Extension capability
-
-
-Phase 5: optimization and Enhancement
-
-
-Performance improvements
-User experience refinement
-Additional features based on user feedback
+For support, please email [your-email@example.com](mailto:your-email@example.com) or open an issue in the repository.
